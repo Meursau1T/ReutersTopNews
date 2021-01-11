@@ -87,7 +87,7 @@ namespace ReutersTopNews
             return splitFileBy(htmlStr,rx);
         }
         static string getParagraphContent(string paragraphHTML){
-            Regex rx = new Regex(@"<p class=.Paragraph-paragraph.*>(?<content>.*?)</p>",RegexOptions.Singleline);
+            Regex rx = new Regex(@"<p class=.Paragraph-paragraph.*?>(?<content>.*?)</p>",RegexOptions.Singleline);
             return getFirstContent(paragraphHTML,rx,"content");
         }
         static List<string> getFullArticle(string articleUrl){
@@ -111,6 +111,7 @@ namespace ReutersTopNews
                 }else{
                     Console.WriteLine(child);
                 }
+                Console.WriteLine();
             }
         }
         static (List<string>,List<string>,List<string>) load(string url,bool refresh = false){
@@ -138,7 +139,7 @@ namespace ReutersTopNews
             public string getPage { get; set; }
             [Option('g',"goto",Default="-1",Required =false,HelpText ="Open specific article.")]
             public string getNumber { get; set; }
-            [Option('w',"wrap",Default="100",Required =false,HelpText ="Set length of a single line.")]
+            [Option('w',"wrap",Default="100",Required =false,HelpText ="Set length of a single line. Set to -1 to output without wrapping.")]
             public string getWrap { get; set; }
         }
 
