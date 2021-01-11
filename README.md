@@ -1,5 +1,4 @@
 # Reuters Top News
-## Description
 View [Reuters top news](https://www.reuters.com/news/archive/newsOne) in command line.
 Rendering the output with [glow](https://github.com/charmbracelet/glow) will give you a better reading experience.
 ## Known issues
