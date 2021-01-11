@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "ZdrY6whgIkgdZQkvCJkUG4shwYXQZuJxjcXGN4CLtHduGRaPaKbbMJzqxnN29E13EpQvCbN4kkIRUlsHs2tYoQ==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\MeursaulT\\OneDrive\\code\\CSharp\\ReutersTopNews\\ReutersTopNews.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\MeursaulT\\.nuget\\packages\\commandlineparser\\2.8.0\\commandlineparser.2.8.0.nupkg.sha512"
+  ],
+  "logs": []
+}
