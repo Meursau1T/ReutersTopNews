@@ -10,7 +10,8 @@ namespace ReutersTopNews
     class Program
     {
         static string topNewsUrl = "https://www.reuters.com/news/archive/newsOne";
-        static string dataPath = "./data";
+        static string dataFolder = Environment.ExpandEnvironmentVariables("%TMP%/reuters/");
+        static string dataPath = dataFolder + "/data";
         // General
         static List<string> getContentList(List<string> articles, Func<string,string> contentFunc){
             List<string> listOfAttribute = new List<string>();
@@ -65,6 +66,12 @@ namespace ReutersTopNews
                 }
             }
             return res;
+        }
+        static int newFolderIfNotExist(){
+            if(!Directory.Exists(dataFolder)){
+                Directory.CreateDirectory(dataFolder);
+            }
+            return 0;
         }
 
 
@@ -144,6 +151,7 @@ namespace ReutersTopNews
         }
 
         static void Main(string[] args) {
+            newFolderIfNotExist();
             Parser.Default.ParseArguments<Options>(args).WithParsed(Run);
         }
         private static void Run(Options options) {
