@@ -99,15 +99,15 @@ namespace ReutersTopNews
 
 
         // Operation
-        static void print(List<string> target,bool showNumber = false,bool wrap = false){
+        static void print(List<string> target,bool showNumber = false,int wrap = -1){
             int cnt = 0;
             foreach(string child in target){
                 if(showNumber){
                     Console.Write("[{0}] ",cnt);
                 }
                 cnt += 1;
-                if(wrap){
-                    Console.WriteLine(wrapLine(child,100));
+                if(wrap > 0){
+                    Console.WriteLine(wrapLine(child,wrap));
                 }else{
                     Console.WriteLine(child);
                 }
@@ -138,6 +138,8 @@ namespace ReutersTopNews
             public string getPage { get; set; }
             [Option('g',"goto",Default="-1",Required =false,HelpText ="Open specific article.")]
             public string getNumber { get; set; }
+            [Option('w',"wrap",Default="100",Required =false,HelpText ="Set length of a single line.")]
+            public string getWrap { get; set; }
         }
 
         static void Main(string[] args) {
@@ -157,7 +159,7 @@ namespace ReutersTopNews
             if (options.isList) {
                 print(titles,true);
             } else if (articleNumber >= 0){
-                print(getFullArticle(urls[articleNumber]),false,true);
+                print(getFullArticle(urls[articleNumber]),false,Int32.Parse(options.getWrap));
             }
         }
     }
