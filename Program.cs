@@ -9,9 +9,16 @@ namespace ReutersTopNews
 {
     class Program
     {
-        static string topNewsUrl = "https://www.reuters.com/news/archive/newsOne";
-        static string dataFolder = Environment.ExpandEnvironmentVariables("%TMP%/reuters/");
-        static string dataPath = dataFolder + "/data";
+        public class Settings{
+            static public string topNewsUrl = "https://www.reuters.com/news/archive/newsOne";
+            static public string worldNewsUrl = "https://www.reuters.com/world";
+            static public string financeNewsUrl = "https://www.reuters.com/finance";
+            static public string breakingViewsUrl = "https://www.reuters.com/breakingviews";
+            static public string techNewsUrl = "https://www.reuters.com/tech";
+            static public string lifeUrl = "https://www.reuters.com/lifestyle";
+            static public string dataFolder = Environment.ExpandEnvironmentVariables("%TMP%/reuters/");
+            static public string dataPath = dataFolder + "/data";
+        }
         // General
         static List<string> getContentList(List<string> articles, Func<string,string> contentFunc){
             List<string> listOfAttribute = new List<string>();
@@ -39,14 +46,14 @@ namespace ReutersTopNews
             return htmlStr;
         }
         static bool existData(){
-            if(!File.Exists(dataPath)){
+            if(!File.Exists(Settings.dataPath)){
                 return false; 
             }else{
                 return true;
             }
         }
         static bool needUpdate(){
-            FileInfo fi = new FileInfo(dataPath);
+            FileInfo fi = new FileInfo(Settings.dataPath);
             var writeTime = fi.LastWriteTime;
             var time = System.DateTime.Now;
             var diffHours = (time - writeTime).TotalHours;
@@ -68,8 +75,8 @@ namespace ReutersTopNews
             return res;
         }
         static int newFolderIfNotExist(){
-            if(!Directory.Exists(dataFolder)){
-                Directory.CreateDirectory(dataFolder);
+            if(!Directory.Exists(Settings.dataFolder)){
+                Directory.CreateDirectory(Settings.dataFolder);
             }
             return 0;
         }
@@ -126,12 +133,12 @@ namespace ReutersTopNews
             string rawContent;
             if(refresh){
                 rawContent = getHtmlStr(url);
-                System.IO.File.WriteAllText(dataPath,rawContent);
+                System.IO.File.WriteAllText(Settings.dataPath,rawContent);
             }else if(existData() && !needUpdate()){
-                rawContent = System.IO.File.ReadAllText(dataPath);
+                rawContent = System.IO.File.ReadAllText(Settings.dataPath);
             }else{
                 rawContent = getHtmlStr(url);
-                System.IO.File.WriteAllText(dataPath,rawContent);
+                System.IO.File.WriteAllText(Settings.dataPath,rawContent);
             }
             articles = getArticleList(rawContent);
             List<string> titles = getContentList(articles,getArticleTitle);
@@ -146,7 +153,7 @@ namespace ReutersTopNews
             public string getPage { get; set; }
             [Option('g',"goto",Default="-1",Required =false,HelpText ="Open specific article.")]
             public string getNumber { get; set; }
-            [Option('w',"wrap",Default="100",Required =false,HelpText ="Set length of a single line. Set to -1 to output without wrapping.")]
+            [Option('w',"wrap",Default="100",Required =false,HelpText ="Set length of a single line. Set to 0 to output without wrapping.")]
             public string getWrap { get; set; }
         }
 
@@ -159,9 +166,9 @@ namespace ReutersTopNews
             int articleNumber = Int32.Parse(options.getNumber);
             List<string> articles, titles, urls;
             if(pageNumber == -1){
-                (articles, titles, urls) = load(topNewsUrl);
+                (articles, titles, urls) = load(Settings.topNewsUrl);
             }else{
-                string newURL = topNewsUrl + $"?view=page&page={pageNumber}&pageSize=10";
+                string newURL = Settings.topNewsUrl + $"?view=page&page={pageNumber}&pageSize=10";
                 (articles, titles, urls) = load(newURL,true);
                 print(titles,true);
             }
