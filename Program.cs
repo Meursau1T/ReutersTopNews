@@ -115,28 +115,30 @@ namespace ReutersTopNews
         // Operation
         static void print(List<string> target,bool showNumber = false,int wrap = -1){
             int cnt = 0;
-            foreach(string child in target){
-                if(showNumber){
-                    Console.Write("[{0}] ",cnt);
-                }
+            Action<string> printWithNumber = x => {
+                Console.WriteLine("[{0}] {1}",cnt,x);
                 cnt += 1;
-                if(wrap > 0){
-                    Console.WriteLine(wrapLine(child,wrap));
-                }else{
-                    Console.WriteLine(child);
-                }
-                Console.WriteLine();
+            };
+            Action<string> printWrap = x => Console.WriteLine(wrapLine(x,wrap));
+            Action<string> printRaw = x => Console.WriteLine(x);
+            switch ((showNumber,wrap)){
+                case (true,-1):
+                    target.ForEach(printWithNumber);
+                    break;
+                case (false,> 0):
+                    target.ForEach(printWrap);    
+                    break;
+                default:
+                    target.ForEach(printRaw);
+                    break;
             }
         }
         static (List<string>,List<string>,List<string>) load(string url,bool refresh = false){
             List<string> articles;
             string rawContent;
-            if(refresh){
-                rawContent = getHtmlStr(url);
-                System.IO.File.WriteAllText(Settings.dataPath,rawContent);
-            }else if(existData() && !needUpdate()){
+            if(!refresh && existData() && !needUpdate()){
                 rawContent = System.IO.File.ReadAllText(Settings.dataPath);
-            }else{
+            } else{
                 rawContent = getHtmlStr(url);
                 System.IO.File.WriteAllText(Settings.dataPath,rawContent);
             }
@@ -147,7 +149,7 @@ namespace ReutersTopNews
         }
         public class Options 
         {
-            [Option('l',"list",Required =false,HelpText ="List top news.")]
+            [Option('l',"list",Default=true,Required =false,HelpText ="List top news.")]
             public bool isList { get; set; }
             [Option('p',"page",Default="-1",Required =false,HelpText ="Load page n.")]
             public string getPage { get; set; }
@@ -155,28 +157,47 @@ namespace ReutersTopNews
             public string getNumber { get; set; }
             [Option('w',"wrap",Default="100",Required =false,HelpText ="Set length of a single line. Set to 0 to output without wrapping.")]
             public string getWrap { get; set; }
+            [Option('r',"refresh",Default=false,Required = false, HelpText = "Refresh list of article.")]
+            public bool isRefresh { get; set; }
+            [Option('s',"source",Default="world",Required = false, HelpText = "Choose news source from [top | world | tech | finance | breakingviews] news.")]
+            public string getSource { get; set; }
         }
-
-        static void Main(string[] args) {
-            newFolderIfNotExist();
-            Parser.Default.ParseArguments<Options>(args).WithParsed(Run);
+        public static string selectURL(Options options){
+            switch (options.getSource){
+                case "top":
+                    return Settings.topNewsUrl;
+                case "world":
+                    return Settings.worldNewsUrl;
+                case "tech":
+                    return Settings.techNewsUrl;
+                case "finance":
+                    return Settings.financeNewsUrl;
+                case "breakingviews":
+                    return Settings.breakingViewsUrl;
+                default:
+                    return Settings.worldNewsUrl;    
+            }
         }
         private static void Run(Options options) {
             int pageNumber = Int32.Parse(options.getPage);
             int articleNumber = Int32.Parse(options.getNumber);
             List<string> articles, titles, urls;
+            string sourceUrl = selectURL(options);
             if(pageNumber == -1){
-                (articles, titles, urls) = load(Settings.topNewsUrl);
+                (articles, titles, urls) = load(sourceUrl,refresh:options.isRefresh);
             }else{
-                string newURL = Settings.topNewsUrl + $"?view=page&page={pageNumber}&pageSize=10";
-                (articles, titles, urls) = load(newURL,true);
-                print(titles,true);
+                string newURL = sourceUrl + $"?view=page&page={pageNumber}&pageSize=10";
+                (articles, titles, urls) = load(newURL,refresh:true);
             }
-            if (options.isList) {
+            if (articleNumber < 0) {
                 print(titles,true);
-            } else if (articleNumber >= 0){
+            } else {
                 print(getFullArticle(urls[articleNumber]),false,Int32.Parse(options.getWrap));
             }
+        }
+        static void Main(string[] args) {
+            newFolderIfNotExist();
+            Parser.Default.ParseArguments<Options>(args).WithParsed(Run);
         }
     }
 }
