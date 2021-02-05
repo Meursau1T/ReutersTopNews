@@ -14,7 +14,7 @@ namespace ReutersTopNews
             static public string worldNewsUrl = "https://www.reuters.com/world";
             static public string financeNewsUrl = "https://www.reuters.com/finance";
             static public string breakingViewsUrl = "https://www.reuters.com/breakingviews";
-            static public string techNewsUrl = "https://www.reuters.com/tech";
+            static public string techNewsUrl = "https://www.reuters.com/technology";
             static public string lifeUrl = "https://www.reuters.com/lifestyle";
             static public string dataFolder = Environment.ExpandEnvironmentVariables("%TMP%/reuters/");
             static public string dataPath = dataFolder + "/data";
@@ -133,14 +133,22 @@ namespace ReutersTopNews
                     break;
             }
         }
-        static (List<string>,List<string>,List<string>) load(string url,bool refresh = false){
+        static (List<string>,List<string>,List<string>) load(string url,bool refresh = false,string source = "world"){
             List<string> articles;
             string rawContent;
+            if(existData()){
+                string[] lines = File.ReadAllLines(Settings.dataPath);
+                string lastLine = lines[^1];
+                if(lastLine != source){
+                    refresh = true;
+                }
+            }
             if(!refresh && existData() && !needUpdate()){
                 rawContent = System.IO.File.ReadAllText(Settings.dataPath);
             } else{
                 rawContent = getHtmlStr(url);
                 System.IO.File.WriteAllText(Settings.dataPath,rawContent);
+                System.IO.File.AppendAllText(Settings.dataPath,source);
             }
             articles = getArticleList(rawContent);
             List<string> titles = getContentList(articles,getArticleTitle);
@@ -184,10 +192,10 @@ namespace ReutersTopNews
             List<string> articles, titles, urls;
             string sourceUrl = selectURL(options);
             if(pageNumber == -1){
-                (articles, titles, urls) = load(sourceUrl,refresh:options.isRefresh);
+                (articles, titles, urls) = load(sourceUrl,refresh:options.isRefresh,source:options.getSource);
             }else{
                 string newURL = sourceUrl + $"?view=page&page={pageNumber}&pageSize=10";
-                (articles, titles, urls) = load(newURL,refresh:true);
+                (articles, titles, urls) = load(newURL,refresh:true,source:options.getSource);
             }
             if (articleNumber < 0) {
                 print(titles,true);
